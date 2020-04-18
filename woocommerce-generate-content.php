@@ -37,44 +37,56 @@ function renderOptionsMenu(){
    <h1>Produkte erstellen</h1>
    <p>Gib eine Anzahl Produkte ein, die erstellt werden sollen.</p>
    <form name="form" action="<?= menu_page_url("generate-content", false) ?>" method="post">
-      <input type="number" id="product-amount" name="product-amount">
+      <p>Präfix für die erstellten Inhalte:</p><input type="text" id="content-prefix" name="content-prefix">
+      <p>Anzahl Inhalte, die erstellt werden sollen:</p><input type="number" id="content-amount" name="content-amount">
       <input type="submit" id="submit-product" name="submit-product">
    </form>
    <?php 
 }
 
 function loadOptions(){
-   print_r($_POST);
    if(isset($_POST['submit-product'])){
-      createProducts($_POST['product-amount']);
+      createContent($_POST['content-amount'], $_POST['content-prefix']);
    };
 }
 
-function createProducts($amount){
+function createContent($amount, $contentPrefix){
    $woocommerce = new Client(
-      'URL', 
-       'Consumer-Key', 
-       'Consumer-Secret',
+      'URL',
+      'Consumer-Key',
+      'Consumer-Secret',
       [    
-           'wp_api' => true,
-          'version' => 'wc/v3',
+         'wp_api' => true,
+         'version' => 'wc/v3',
       ]
   );
 
    for($i = 0; $i < $amount; $i++ ){
-      createProduct($woocommerce, $i);
+      $title = $contentPrefix . "-" . $i;
 
+      createPost($title, 'post');
+      createPost($title, 'page');
+      createProduct($title, $woocommerce);
    }
 }
 
-// wp_insert_post -> über Type Post oder Page festlegen
+function createPost($postTitle, $type){
+   $post = [
+      'post_title'    => $postTitle,
+      'post_content'  => 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.',
+      'post_status'   => 'publish',
+      'post_author'   => 1,
+      'post_type' => $type
+   ];
 
-function createProduct($woocommerce, $productID){
-   $productName = 'Oles Produkt '.$productID;
+   wp_insert_post( $post );
+}
+
+function createProduct($productTitle, $woocommerce){
    $product = [
-      'name' => $productName,
+      'name' => $productTitle,
       'type' => 'simple',
-      'regular_price' => '21.99',
+      'regular_price' => '12.95',
       'description' => 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.',
       'short_description' => 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr.',
       'categories' => [
@@ -94,21 +106,3 @@ function createProduct($woocommerce, $productID){
   
   print_r($woocommerce->post('products', $product));
 }
-
-// function initAPI(){  
-//    $woocommerce = new Client(
-//       'URL', 
-//       'Consumer-Key', 
-//       'Consumer-Secret',
-//       [    
-//            'wp_api' => true,
-//           'version' => 'wc/v3',
-//       ]
-//   );
-
-//  print_r($woocommerce->get('products')); 
-// }
-
-//Action / Hook raussuchen, die ich verwenden kann wenn WooCommerce fertig geladen ist. https://docs.woocommerce.com/wc-apidocs/hook-docs.html
-//add_action( "wp_loaded", "initAPI" );
-
