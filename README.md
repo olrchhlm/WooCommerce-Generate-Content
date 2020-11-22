@@ -1,5 +1,5 @@
 # WooCommerce-Generate-Content
-A WordPress Plugin that generates content for a WooCommerce onlineshop. 
+A simple WordPress Plugin that generates content for testing-purposes for a WooCommerce onlineshop. 
 
 ## How to use
 1. Install Plugin
